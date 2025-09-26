@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="it">
 <head>
   <meta charset="utf-8" />
@@ -12,80 +12,46 @@
       margin: auto; 
       background-color: #121212; 
       color: #ffffff; 
-      animation: fadeIn 1s ease-in; 
     }
-    h1 { 
-      font-size: 1.5rem; 
-      text-align: center; 
-      margin-bottom: 20px; 
-    }
+    h1 { font-size: 1.2rem; }
     .videos { 
       display: flex; 
       gap: 10px; 
       flex-wrap: wrap; 
-      margin-bottom: 20px; 
-      justify-content: center; 
+      margin-bottom: 10px; 
     }
     video { 
       width: 48%; 
       background: #000; 
       border-radius: 6px; 
       max-height: 60vh; 
-      object-fit: contain; 
+      object-fit: cover; 
       opacity: 0; 
       transition: opacity 0.5s ease-in-out; 
-      cursor: pointer;
     }
     video.loaded { opacity: 1; }
     .controls { 
       display: flex; 
       gap: 8px; 
       flex-wrap: wrap; 
-      margin-bottom: 20px; 
-      justify-content: center; 
-      align-items: center; 
-    }
-    .join-container {
-      display: flex;
-      align-items: center;
-      background: #333;
-      border-radius: 6px;
-      border: 1px solid #444;
-      overflow: hidden;
-      transition: border-color 0.3s ease;
-    }
-    .join-container:hover {
-      border-color: #888;
+      margin-bottom: 12px; 
     }
     input[type=text] { 
-      padding: 10px; 
-      border: none; 
-      background: transparent; 
+      padding: 6px; 
+      border-radius: 6px; 
+      border: 1px solid #444; 
+      background: #222; 
       color: #fff; 
-      width: 200px; 
-      font-size: 1rem;
-      outline: none;
+      transition: border-color 0.3s ease; 
     }
-    .join-container button {
-      padding: 10px 20px;
-      border: none;
-      background: #444;
-      color: #fff;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.3s ease;
-    }
-    .join-container button:hover {
-      background: #555;
-    }
+    input[type=text]:focus { border-color: #888; }
     button { 
-      padding: 10px 20px; 
+      padding: 8px 12px; 
       border-radius: 6px; 
       border: 1px solid #444; 
       background: #333; 
       color: #fff; 
       cursor: pointer; 
-      font-size: 1rem; 
       transition: transform 0.2s ease, background 0.3s ease; 
     }
     button:hover { 
@@ -97,146 +63,57 @@
       cursor: not-allowed; 
       transform: none; 
     }
-    #hangupBtn {
-      background: #d32f2f;
-      border-color: #b71c1c;
-    }
-    #hangupBtn:hover {
-      background: #ef5350;
-      transform: scale(1.05);
-    }
-    select {
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #444;
-      background: #333;
-      color: #fff;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    select:hover {
-      background: #444;
-    }
     .small { 
       font-size: 0.9rem; 
       color: #aaa; 
       margin-top: 8px; 
-      text-align: center; 
     }
     .log { 
       white-space: pre-wrap; 
       background: #1e1e1e; 
-      padding: 12px; 
+      padding: 8px; 
       border-radius: 6px; 
       border: 1px solid #333; 
-      max-height: 150px; 
+      max-height: 120px; 
       overflow: auto; 
       color: #ddd; 
-      margin-bottom: 20px; 
-    }
-    .tutorial {
-      background: #1e1e1e;
-      padding: 15px;
-      border-radius: 6px;
-      border: 1px solid #333;
-      margin-bottom: 20px;
-    }
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    .modal-content {
-      background: #222;
-      padding: 20px;
-      border-radius: 8px;
-      border: 1px solid #444;
-      text-align: center;
-      max-width: 400px;
-      width: 90%;
-    }
-    .modal-content button {
-      margin: 10px;
-    }
-    .timer {
-      font-size: 1rem;
-      color: #aaa;
-      text-align: center;
-      margin-bottom: 20px;
     }
     @keyframes fadeIn { 
       from { opacity: 0; } 
       to { opacity: 1; } 
     }
+    body { animation: fadeIn 1s ease-in; }
   </style>
 </head>
 <body>
   <h1>Benvenuti in AleXCall</h1>
 
   <div class="videos">
-    <video id="localVideo" autoplay playsinline muted controls></video>
-    <video id="remoteVideo" autoplay playsinline controls></video>
+    <video id="localVideo" autoplay playsinline muted></video>
+    <video id="remoteVideo" autoplay playsinline></video>
   </div>
-
-  <div id="timer" class="timer">Tempo chiamata: 00:00</div>
 
   <div class="controls">
-    <button id="createRoomBtn">Crea stanza</button>
-    <div class="join-container">
-      <input id="roomIdInput" type="text" placeholder="Inserisci ID stanza" />
-      <button id="joinRoomBtn">Unisciti</button>
-    </div>
-    <button id="startMicBtn" style="display: none;">Avvia microfono</button>
-    <button id="startCameraBtn" style="display: none;">Avvia fotocamera</button>
-    <button id="toggleMicBtn" style="display: none;">Disattiva microfono</button>
-    <button id="toggleCameraBtn" style="display: none;">Disattiva fotocamera</button>
-    <button id="hangupBtn" style="display: none;">Termina</button>
-    <button id="copyRoomBtn" style="display: none;">Copia link stanza</button>
-    <select id="cameraSelect" style="display: none;" onchange="changeCamera()">
-      <option value="">Seleziona fotocamera</option>
-    </select>
-    <select id="audioOutputSelect" style="display: none;" onchange="changeAudioOutput()">
-      <option value="">Seleziona uscita audio</option>
-    </select>
+    <button id="startLocalBtn">Avvia microfono/camera</button>
+    <button id="createRoomBtn" disabled>Crea stanza</button>
+    <input id="roomIdInput" type="text" placeholder="ID stanza (per unirsi)" />
+    <button id="joinRoomBtn">Unisciti a stanza</button>
+    <button id="hangupBtn" disabled>Termina</button>
+    <button id="copyRoomBtn" disabled>Copia link stanza</button>
   </div>
 
-  <div id="mediaModal" class="modal">
-    <div class="modal-content">
-      <h3>Seleziona come preferisci entrare</h3>
-      <p>Quali vuoi attivare? (Potrai comunque attivarli o disattivarli dopo questo passaggio)</p>
-      <button id="enableMicBtn">Microfono</button>
-      <button id="enableCameraBtn">Fotocamera</button>
-      <button id="enableBothBtn">Entrambi</button>
-      <button id="skipMediaBtn">Nessuno</button>
-    </div>
-  </div>
 
   <h3>Log</h3>
   <div id="log" class="log"></div>
 
-  <div class="tutorial">
-    <h3>Tutorial: Come usare AleXCall</h3>
-    <ol>
-      <li>Clicca su "Crea stanza" per iniziare una nuova chiamata e scegli se attivare microfono e/o fotocamera.</li>
-      <li>Copia il link della stanza e condividilo con l'altra persona.</li>
-      <li>Per unirti a una stanza esistente, inserisci l'ID stanza e clicca "Unisciti".</li>
-      <li>Attiva o disattiva microfono e fotocamera durante la chiamata con i pulsanti appositi.</li>
-      <li>Per terminare la chiamata, clicca "Termina".</li>
-    </ol>
-  </div>
-
+  <!-- Firebase (using compat bundles for global namespace) -->
   <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
 
   <script>
+  // -------------------------
+  // CONFIGURA FIREBASE QUI
+  // -------------------------
   const firebaseConfig = {
     apiKey: "AIzaSyCanlHzk_uRRSZQzug65OFkWbqWg3Q_Xik",
     authDomain: "project-chats-ef9a8.firebaseapp.com",
@@ -245,6 +122,7 @@
     messagingSenderId: "209738442357",
     appId: "1:209738442357:web:448eefd9651d0443ad3a3c",
   };
+  // -------------------------
 
   const app = firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
@@ -257,271 +135,28 @@
   let localStream = null;
   let remoteStream = null;
   let roomId = null;
-  let micEnabled = false;
-  let cameraEnabled = false;
-  let callTimer = null;
-  let callStartTime = null;
-  let roomTimeout = null;
 
   const localVideo = document.getElementById('localVideo');
   const remoteVideo = document.getElementById('remoteVideo');
-  const startMicBtn = document.getElementById('startMicBtn');
-  const startCameraBtn = document.getElementById('startCameraBtn');
-  const toggleMicBtn = document.getElementById('toggleMicBtn');
-  const toggleCameraBtn = document.getElementById('toggleCameraBtn');
+  const startLocalBtn = document.getElementById('startLocalBtn');
   const createRoomBtn = document.getElementById('createRoomBtn');
   const joinRoomBtn = document.getElementById('joinRoomBtn');
-  const joinContainer = document.querySelector('.join-container');
   const hangupBtn = document.getElementById('hangupBtn');
   const roomIdInput = document.getElementById('roomIdInput');
   const copyRoomBtn = document.getElementById('copyRoomBtn');
   const logDiv = document.getElementById('log');
-  const mediaModal = document.getElementById('mediaModal');
-  const enableMicBtn = document.getElementById('enableMicBtn');
-  const enableCameraBtn = document.getElementById('enableCameraBtn');
-  const enableBothBtn = document.getElementById('enableBothBtn');
-  const skipMediaBtn = document.getElementById('skipMediaBtn');
-  const timerDiv = document.getElementById('timer');
-  const cameraSelect = document.getElementById('cameraSelect');
-  const audioOutputSelect = document.getElementById('audioOutputSelect');
 
-  function log(msg) {
+  function log(msg){
     const time = new Date().toLocaleTimeString();
     logDiv.textContent = `[${time}] ${msg}\n` + logDiv.textContent;
   }
 
-  function updateButtonVisibility() {
-    if (roomId) {
-      createRoomBtn.style.display = 'none';
-      joinContainer.style.display = 'none';
-    } else {
-      createRoomBtn.style.display = 'inline-block';
-      joinContainer.style.display = 'flex';
-    }
-    cameraSelect.style.display = cameraEnabled ? 'inline-block' : 'none';
-    audioOutputSelect.style.display = 'inline-block';
-  }
-
-  function updateTimer() {
-    if (callStartTime) {
-      const now = new Date();
-      const elapsed = Math.floor((now - callStartTime) / 1000);
-      const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
-      const seconds = (elapsed % 60).toString().padStart(2, '0');
-      timerDiv.textContent = `Tempo chiamata: ${minutes}:${seconds}`;
-    }
-  }
-
-  function startCallTimer() {
-    if (!callTimer) {
-      callStartTime = new Date();
-      callTimer = setInterval(updateTimer, 1000);
-    }
-  }
-
-  function stopCallTimer() {
-    if (callTimer) {
-      clearInterval(callTimer);
-      callTimer = null;
-      callStartTime = null;
-      timerDiv.textContent = 'Tempo chiamata: 00:00';
-    }
-  }
-
-  async function populateCameraSelect() {
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(device => device.kind === 'videoinput');
-      cameraSelect.innerHTML = '<option value="">Seleziona fotocamera</option>';
-      videoDevices.forEach(device => {
-        const option = document.createElement('option');
-        option.value = device.deviceId;
-        option.text = device.label || `Fotocamera ${cameraSelect.length + 1}`;
-        cameraSelect.appendChild(option);
-      });
-    } catch (error) {
-      log(`Errore nell'elenco delle fotocamere: ${error.message}`);
-    }
-  }
-
-  async function populateAudioOutputSelect() {
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const audioDevices = devices.filter(device => device.kind === 'audiooutput');
-      audioOutputSelect.innerHTML = '<option value="">Seleziona uscita audio</option>';
-      audioDevices.forEach(device => {
-        const option = document.createElement('option');
-        option.value = device.deviceId;
-        option.text = device.label || `Uscita audio ${audioOutputSelect.length + 1}`;
-        audioOutputSelect.appendChild(option);
-      });
-    } catch (error) {
-      log(`Errore nell'elenco delle uscite audio: ${error.message}`);
-    }
-  }
-
-  async function changeCamera() {
-    if (!cameraEnabled || !cameraSelect.value) return;
-    try {
-      const newStream = await navigator.mediaDevices.getUserMedia({
-        video: { deviceId: { exact: cameraSelect.value } }
-      });
-      const newVideoTrack = newStream.getVideoTracks()[0];
-      const oldVideoTrack = localStream.getVideoTracks()[0];
-      if (oldVideoTrack) {
-        localStream.removeTrack(oldVideoTrack);
-        oldVideoTrack.stop();
-      }
-      localStream.addTrack(newVideoTrack);
-      if (pc) {
-        const sender = pc.getSenders().find(s => s.track.kind === 'video');
-        if (sender) {
-          await sender.replaceTrack(newVideoTrack);
-        }
-      }
-      localVideo.srcObject = localStream;
-      log("Fotocamera cambiata");
-    } catch (error) {
-      log(`Errore nel cambio della fotocamera: ${error.message}`);
-    }
-  }
-
-  async function changeAudioOutput() {
-    if (!audioOutputSelect.value) return;
-    try {
-      await remoteVideo.setSinkId(audioOutputSelect.value);
-      log("Uscita audio cambiata");
-    } catch (error) {
-      log(`Errore nel cambio dell'uscita audio: ${error.message}`);
-    }
-  }
-
-  async function initLocalStream(video = false, audio = false) {
-    if (!localStream) {
-      try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video, audio });
-        localVideo.srcObject = localStream;
-        localVideo.classList.add('loaded');
-        if (audio) {
-          applyAudioBoost(localStream);
-        }
-        if (video) {
-          await populateCameraSelect();
-        }
-        await populateAudioOutputSelect();
-      } catch (error) {
-        log(`Errore nell'accesso ai dispositivi: ${error.message}`);
-        alert("Errore nell'accesso a microfono o fotocamera. Controlla i permessi.");
-        return false;
-      }
-    } else {
-      if (video && !cameraEnabled) {
-        const videoTrack = (await navigator.mediaDevices.getUserMedia({ video: true })).getVideoTracks()[0];
-        localStream.addTrack(videoTrack);
-        await populateCameraSelect();
-      }
-      if (audio && !micEnabled) {
-        const audioTrack = (await navigator.mediaDevices.getUserMedia({ audio: true })).getAudioTracks()[0];
-        localStream.addTrack(audioTrack);
-        applyAudioBoost(localStream);
-      }
-      await populateAudioOutputSelect();
-    }
-    return true;
-  }
-
-  function applyAudioBoost(stream) {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const source = audioContext.createMediaStreamSource(stream);
-    const gainNode = audioContext.createGain();
-    gainNode.gain.value = 1.5; // Boost audio by 1.5x
-    source.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-  }
-
-  function showMediaModal() {
-    mediaModal.style.display = 'flex';
-  }
-
-  function hideMediaModal() {
-    mediaModal.style.display = 'none';
-  }
-
-  async function createRoomWithMedia(video = false, audio = false) {
-    if (video || audio) {
-      const success = await initLocalStream(video, audio);
-      if (!success) return;
-      if (audio) {
-        micEnabled = true;
-        toggleMicBtn.style.display = 'inline-block';
-        toggleMicBtn.textContent = 'Disattiva microfono';
-        startMicBtn.style.display = 'none';
-        log("Microfono avviato");
-      }
-      if (video) {
-        cameraEnabled = true;
-        toggleCameraBtn.style.display = 'inline-block';
-        toggleCameraBtn.textContent = 'Disattiva fotocamera';
-        startCameraBtn.style.display = 'none';
-        log("Fotocamera avviata");
-      }
-    }
-    startMicBtn.style.display = micEnabled ? 'none' : 'inline-block';
-    startCameraBtn.style.display = cameraEnabled ? 'none' : 'inline-block';
-    hangupBtn.style.display = 'inline-block';
-    copyRoomBtn.style.display = 'inline-block';
-    updateButtonVisibility();
-    await createRoom();
-  }
-
-  startMicBtn.onclick = async () => {
-    const success = await initLocalStream(false, true);
-    if (!success) return;
-    micEnabled = true;
-    toggleMicBtn.style.display = 'inline-block';
-    toggleMicBtn.textContent = 'Disattiva microfono';
-    startMicBtn.style.display = 'none';
-    log("Microfono avviato");
-  };
-
-  startCameraBtn.onclick = async () => {
-    const success = await initLocalStream(true, false);
-    if (!success) return;
-    cameraEnabled = true;
-    toggleCameraBtn.style.display = 'inline-block';
-    toggleCameraBtn.textContent = 'Disattiva fotocamera';
-    startCameraBtn.style.display = 'none';
-    log("Fotocamera avviata");
-  };
-
-  toggleMicBtn.onclick = () => {
-    if (micEnabled) {
-      localStream.getAudioTracks().forEach(track => track.enabled = false);
-      toggleMicBtn.textContent = 'Attiva microfono';
-      micEnabled = false;
-      log("Microfono disattivato");
-    } else {
-      localStream.getAudioTracks().forEach(track => track.enabled = true);
-      toggleMicBtn.textContent = 'Disattiva microfono';
-      micEnabled = true;
-      log("Microfono attivato");
-    }
-  };
-
-  toggleCameraBtn.onclick = () => {
-    if (cameraEnabled) {
-      localStream.getVideoTracks().forEach(track => track.enabled = false);
-      toggleCameraBtn.textContent = 'Attiva fotocamera';
-      cameraEnabled = false;
-      cameraSelect.style.display = 'none';
-      log("Fotocamera disattivata");
-    } else {
-      localStream.getVideoTracks().forEach(track => track.enabled = true);
-      toggleCameraBtn.textContent = 'Disattiva fotocamera';
-      cameraEnabled = true;
-      cameraSelect.style.display = 'inline-block';
-      log("Fotocamera attivata");
-    }
+  startLocalBtn.onclick = async () => {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    localVideo.srcObject = localStream;
+    localVideo.classList.add('loaded');
+    createRoomBtn.disabled = false;
+    log("Local stream avviato");
   };
 
   function createPeerConnection() {
@@ -529,79 +164,22 @@
     remoteStream = new MediaStream();
     remoteVideo.srcObject = remoteStream;
 
-    if (localStream) {
-      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-    }
+    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 
     pc.ontrack = (event) => {
       event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
       remoteVideo.classList.add('loaded');
       log("Track remoto aggiunto");
-      startCallTimer();
-    };
-
-    pc.onconnectionstatechange = async () => {
-      if (pc.connectionState === 'disconnected' || pc.connectionState === 'closed') {
-        await startRoomTimeout();
-      }
     };
 
     return pc;
   }
 
-  async function startRoomTimeout() {
-    if (roomId && !roomTimeout) {
-      roomTimeout = setTimeout(async () => {
-        if (roomId) {
-          const roomRef = db.collection("rooms").doc(roomId);
-          await roomRef.collection("callerCandidates").get().then(snapshot => {
-            snapshot.forEach(doc => doc.ref.delete());
-          });
-          await roomRef.collection("calleeCandidates").get().then(snapshot => {
-            snapshot.forEach(doc => doc.ref.delete());
-          });
-          await roomRef.delete();
-          log(`Stanza ${roomId} eliminata dopo 3 minuti di inattività`);
-          roomId = null;
-          updateButtonVisibility();
-          stopCallTimer();
-        }
-        roomTimeout = null;
-      }, 3 * 60 * 1000); // 3 minutes
-    }
-  }
-
-  async function clearRoomTimeout() {
-    if (roomTimeout) {
-      clearTimeout(roomTimeout);
-      roomTimeout = null;
-    }
-  }
-
-  async function generateUniqueRoomId() {
-    const characters = '0123';
-    let tries = 0;
-    while (tries < 10) {
-      const id = [...Array(3)].map(() => characters.charAt(Math.floor(Math.random() * characters.length))).join('');
-      const roomRef = db.collection("rooms").doc(id);
-      const snapshot = await roomRef.get();
-      if (!snapshot.exists) {
-        return { id, roomRef };
-      }
-      tries++;
-    }
-    alert("Impossibile generare un ID unico. Riprova.");
-    return null;
-  }
-
-  async function createRoom() {
-    const unique = await generateUniqueRoomId();
-    if (!unique) return;
-    const { id, roomRef } = unique;
-    roomId = id;
-
+  createRoomBtn.onclick = async () => {
     pc = createPeerConnection();
 
+    const roomRef = await db.collection("rooms").doc();
+    roomId = roomRef.id;
     log("Stanza creata: " + roomId);
 
     const callerCandidatesCollection = roomRef.collection("callerCandidates");
@@ -622,7 +200,6 @@
         const answer = new RTCSessionDescription(data.answer);
         await pc.setRemoteDescription(answer);
         log("Answer impostata");
-        await clearRoomTimeout();
       }
     });
 
@@ -635,37 +212,13 @@
       });
     });
 
+    hangupBtn.disabled = false;
+    copyRoomBtn.disabled = false;
     copyRoomBtn.onclick = () => {
       const url = `${location.origin}${location.pathname}?room=${roomId}`;
       navigator.clipboard.writeText(url);
       alert("Link stanza copiato!");
     };
-
-    await startRoomTimeout();
-  }
-
-  createRoomBtn.onclick = () => {
-    showMediaModal();
-  };
-
-  enableMicBtn.onclick = async () => {
-    hideMediaModal();
-    await createRoomWithMedia(false, true);
-  };
-
-  enableCameraBtn.onclick = async () => {
-    hideMediaModal();
-    await createRoomWithMedia(true, false);
-  };
-
-  enableBothBtn.onclick = async () => {
-    hideMediaModal();
-    await createRoomWithMedia(true, true);
-  };
-
-  skipMediaBtn.onclick = async () => {
-    hideMediaModal();
-    await createRoomWithMedia(false, false);
   };
 
   joinRoomBtn.onclick = async () => {
@@ -677,51 +230,6 @@
     const roomSnapshot = await roomRef.get();
     if (!roomSnapshot.exists) return alert("Stanza non trovata");
 
-    showMediaModal();
-    enableMicBtn.onclick = async () => {
-      hideMediaModal();
-      await joinRoomWithMedia(false, true);
-    };
-    enableCameraBtn.onclick = async () => {
-      hideMediaModal();
-      await joinRoomWithMedia(true, false);
-    };
-    enableBothBtn.onclick = async () => {
-      hideMediaModal();
-      await joinRoomWithMedia(true, true);
-    };
-    skipMediaBtn.onclick = async () => {
-      hideMediaModal();
-      await joinRoomWithMedia(false, false);
-    };
-  };
-
-  async function joinRoomWithMedia(video = false, audio = false) {
-    if (video || audio) {
-      const success = await initLocalStream(video, audio);
-      if (!success) return;
-      if (audio) {
-        micEnabled = true;
-        toggleMicBtn.style.display = 'inline-block';
-        toggleMicBtn.textContent = 'Disattiva microfono';
-        startMicBtn.style.display = 'none';
-        log("Microfono avviato");
-      }
-      if (video) {
-        cameraEnabled = true;
-        toggleCameraBtn.style.display = 'inline-block';
-        toggleCameraBtn.textContent = 'Disattiva fotocamera';
-        startCameraBtn.style.display = 'none';
-        log("Fotocamera avviata");
-      }
-    }
-    startMicBtn.style.display = micEnabled ? 'none' : 'inline-block';
-    startCameraBtn.style.display = cameraEnabled ? 'none' : 'inline-block';
-    hangupBtn.style.display = 'inline-block';
-    copyRoomBtn.style.display = 'inline-block';
-    updateButtonVisibility();
-
-    const roomRef = db.collection("rooms").doc(roomId);
     pc = createPeerConnection();
 
     const calleeCandidatesCollection = roomRef.collection("calleeCandidates");
@@ -731,7 +239,7 @@
       }
     };
 
-    const roomData = (await roomRef.get()).data();
+    const roomData = roomSnapshot.data();
     await pc.setRemoteDescription(new RTCSessionDescription(roomData.offer));
 
     const answer = await pc.createAnswer();
@@ -748,8 +256,8 @@
       });
     });
 
-    await clearRoomTimeout();
-  }
+    hangupBtn.disabled = false;
+  };
 
   hangupBtn.onclick = async () => {
     if (pc) {
@@ -758,33 +266,13 @@
     }
     if (localStream) {
       localStream.getTracks().forEach(track => track.stop());
-      localStream = null;
     }
     log("Chiamata terminata");
-    micEnabled = false;
-    cameraEnabled = false;
-    toggleMicBtn.style.display = 'none';
-    toggleCameraBtn.style.display = 'none';
-    startMicBtn.style.display = 'inline-block';
-    startCameraBtn.style.display = 'inline-block';
-    hangupBtn.style.display = 'none';
-    copyRoomBtn.style.display = 'none';
-    cameraSelect.style.display = 'none';
-    audioOutputSelect.style.display = 'none';
-    localVideo.classList.remove('loaded');
-    remoteVideo.classList.remove('loaded');
-    roomIdInput.value = '';
-    stopCallTimer();
-    await startRoomTimeout();
-    roomId = null;
-    updateButtonVisibility();
   };
 
-  (function prefillFromURL() {
+  (function prefillFromURL(){
     const urlRoom = new URLSearchParams(location.search).get('room');
     if (urlRoom) roomIdInput.value = urlRoom;
-    updateButtonVisibility();
-    populateAudioOutputSelect();
   })();
   </script>
 </body>
