@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="utf-8" />
@@ -31,16 +31,12 @@
       background: #000; 
       border-radius: 6px; 
       max-height: 60vh; 
-      object-fit: cover; 
+      object-fit: contain; 
       opacity: 0; 
       transition: opacity 0.5s ease-in-out; 
       cursor: pointer;
     }
     video.loaded { opacity: 1; }
-    video.enlarged {
-      width: 100%;
-      max-height: 80vh;
-    }
     .controls { 
       display: flex; 
       gap: 8px; 
@@ -101,6 +97,27 @@
       cursor: not-allowed; 
       transform: none; 
     }
+    #hangupBtn {
+      background: #d32f2f;
+      border-color: #b71c1c;
+    }
+    #hangupBtn:hover {
+      background: #ef5350;
+      transform: scale(1.05);
+    }
+    select {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #333;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    select:hover {
+      background: #444;
+    }
     .small { 
       font-size: 0.9rem; 
       color: #aaa; 
@@ -149,6 +166,12 @@
     .modal-content button {
       margin: 10px;
     }
+    .timer {
+      font-size: 1rem;
+      color: #aaa;
+      text-align: center;
+      margin-bottom: 20px;
+    }
     @keyframes fadeIn { 
       from { opacity: 0; } 
       to { opacity: 1; } 
@@ -159,9 +182,11 @@
   <h1>Benvenuti in AleXCall</h1>
 
   <div class="videos">
-    <video id="localVideo" autoplay playsinline muted></video>
-    <video id="remoteVideo" autoplay playsinline></video>
+    <video id="localVideo" autoplay playsinline muted controls></video>
+    <video id="remoteVideo" autoplay playsinline controls></video>
   </div>
+
+  <div id="timer" class="timer">Tempo chiamata: 00:00</div>
 
   <div class="controls">
     <button id="createRoomBtn">Crea stanza</button>
@@ -175,13 +200,18 @@
     <button id="toggleCameraBtn" style="display: none;">Disattiva fotocamera</button>
     <button id="hangupBtn" style="display: none;">Termina</button>
     <button id="copyRoomBtn" style="display: none;">Copia link stanza</button>
-    <button id="shrinkVideoBtn" style="display: none;">Rimpicciolisci video</button>
+    <select id="cameraSelect" style="display: none;" onchange="changeCamera()">
+      <option value="">Seleziona fotocamera</option>
+    </select>
+    <select id="audioOutputSelect" style="display: none;" onchange="changeAudioOutput()">
+      <option value="">Seleziona uscita audio</option>
+    </select>
   </div>
 
   <div id="mediaModal" class="modal">
     <div class="modal-content">
       <h3>Seleziona come preferisci entrare</h3>
-      <p>Quali vuoi attivare?(Potrai comunque attivarli o disattivarli dopo questo passaggio)</p>
+      <p>Quali vuoi attivare? (Potrai comunque attivarli o disattivarli dopo questo passaggio)</p>
       <button id="enableMicBtn">Microfono</button>
       <button id="enableCameraBtn">Fotocamera</button>
       <button id="enableBothBtn">Entrambi</button>
@@ -203,7 +233,6 @@
     </ol>
   </div>
 
-  <!-- Firebase (using compat bundles for global namespace) -->
   <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
 
@@ -230,6 +259,9 @@
   let roomId = null;
   let micEnabled = false;
   let cameraEnabled = false;
+  let callTimer = null;
+  let callStartTime = null;
+  let roomTimeout = null;
 
   const localVideo = document.getElementById('localVideo');
   const remoteVideo = document.getElementById('remoteVideo');
@@ -243,13 +275,15 @@
   const hangupBtn = document.getElementById('hangupBtn');
   const roomIdInput = document.getElementById('roomIdInput');
   const copyRoomBtn = document.getElementById('copyRoomBtn');
-  const shrinkVideoBtn = document.getElementById('shrinkVideoBtn');
   const logDiv = document.getElementById('log');
   const mediaModal = document.getElementById('mediaModal');
   const enableMicBtn = document.getElementById('enableMicBtn');
   const enableCameraBtn = document.getElementById('enableCameraBtn');
   const enableBothBtn = document.getElementById('enableBothBtn');
   const skipMediaBtn = document.getElementById('skipMediaBtn');
+  const timerDiv = document.getElementById('timer');
+  const cameraSelect = document.getElementById('cameraSelect');
+  const audioOutputSelect = document.getElementById('audioOutputSelect');
 
   function log(msg) {
     const time = new Date().toLocaleTimeString();
@@ -264,6 +298,102 @@
       createRoomBtn.style.display = 'inline-block';
       joinContainer.style.display = 'flex';
     }
+    cameraSelect.style.display = cameraEnabled ? 'inline-block' : 'none';
+    audioOutputSelect.style.display = 'inline-block';
+  }
+
+  function updateTimer() {
+    if (callStartTime) {
+      const now = new Date();
+      const elapsed = Math.floor((now - callStartTime) / 1000);
+      const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+      const seconds = (elapsed % 60).toString().padStart(2, '0');
+      timerDiv.textContent = `Tempo chiamata: ${minutes}:${seconds}`;
+    }
+  }
+
+  function startCallTimer() {
+    if (!callTimer) {
+      callStartTime = new Date();
+      callTimer = setInterval(updateTimer, 1000);
+    }
+  }
+
+  function stopCallTimer() {
+    if (callTimer) {
+      clearInterval(callTimer);
+      callTimer = null;
+      callStartTime = null;
+      timerDiv.textContent = 'Tempo chiamata: 00:00';
+    }
+  }
+
+  async function populateCameraSelect() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      cameraSelect.innerHTML = '<option value="">Seleziona fotocamera</option>';
+      videoDevices.forEach(device => {
+        const option = document.createElement('option');
+        option.value = device.deviceId;
+        option.text = device.label || `Fotocamera ${cameraSelect.length + 1}`;
+        cameraSelect.appendChild(option);
+      });
+    } catch (error) {
+      log(`Errore nell'elenco delle fotocamere: ${error.message}`);
+    }
+  }
+
+  async function populateAudioOutputSelect() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioDevices = devices.filter(device => device.kind === 'audiooutput');
+      audioOutputSelect.innerHTML = '<option value="">Seleziona uscita audio</option>';
+      audioDevices.forEach(device => {
+        const option = document.createElement('option');
+        option.value = device.deviceId;
+        option.text = device.label || `Uscita audio ${audioOutputSelect.length + 1}`;
+        audioOutputSelect.appendChild(option);
+      });
+    } catch (error) {
+      log(`Errore nell'elenco delle uscite audio: ${error.message}`);
+    }
+  }
+
+  async function changeCamera() {
+    if (!cameraEnabled || !cameraSelect.value) return;
+    try {
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        video: { deviceId: { exact: cameraSelect.value } }
+      });
+      const newVideoTrack = newStream.getVideoTracks()[0];
+      const oldVideoTrack = localStream.getVideoTracks()[0];
+      if (oldVideoTrack) {
+        localStream.removeTrack(oldVideoTrack);
+        oldVideoTrack.stop();
+      }
+      localStream.addTrack(newVideoTrack);
+      if (pc) {
+        const sender = pc.getSenders().find(s => s.track.kind === 'video');
+        if (sender) {
+          await sender.replaceTrack(newVideoTrack);
+        }
+      }
+      localVideo.srcObject = localStream;
+      log("Fotocamera cambiata");
+    } catch (error) {
+      log(`Errore nel cambio della fotocamera: ${error.message}`);
+    }
+  }
+
+  async function changeAudioOutput() {
+    if (!audioOutputSelect.value) return;
+    try {
+      await remoteVideo.setSinkId(audioOutputSelect.value);
+      log("Uscita audio cambiata");
+    } catch (error) {
+      log(`Errore nel cambio dell'uscita audio: ${error.message}`);
+    }
   }
 
   async function initLocalStream(video = false, audio = false) {
@@ -272,6 +402,13 @@
         localStream = await navigator.mediaDevices.getUserMedia({ video, audio });
         localVideo.srcObject = localStream;
         localVideo.classList.add('loaded');
+        if (audio) {
+          applyAudioBoost(localStream);
+        }
+        if (video) {
+          await populateCameraSelect();
+        }
+        await populateAudioOutputSelect();
       } catch (error) {
         log(`Errore nell'accesso ai dispositivi: ${error.message}`);
         alert("Errore nell'accesso a microfono o fotocamera. Controlla i permessi.");
@@ -281,13 +418,25 @@
       if (video && !cameraEnabled) {
         const videoTrack = (await navigator.mediaDevices.getUserMedia({ video: true })).getVideoTracks()[0];
         localStream.addTrack(videoTrack);
+        await populateCameraSelect();
       }
       if (audio && !micEnabled) {
         const audioTrack = (await navigator.mediaDevices.getUserMedia({ audio: true })).getAudioTracks()[0];
         localStream.addTrack(audioTrack);
+        applyAudioBoost(localStream);
       }
+      await populateAudioOutputSelect();
     }
     return true;
+  }
+
+  function applyAudioBoost(stream) {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioContext.createMediaStreamSource(stream);
+    const gainNode = audioContext.createGain();
+    gainNode.gain.value = 1.5; // Boost audio by 1.5x
+    source.connect(gainNode);
+    gainNode.connect(audioContext.destination);
   }
 
   function showMediaModal() {
@@ -364,11 +513,13 @@
       localStream.getVideoTracks().forEach(track => track.enabled = false);
       toggleCameraBtn.textContent = 'Attiva fotocamera';
       cameraEnabled = false;
+      cameraSelect.style.display = 'none';
       log("Fotocamera disattivata");
     } else {
       localStream.getVideoTracks().forEach(track => track.enabled = true);
       toggleCameraBtn.textContent = 'Disattiva fotocamera';
       cameraEnabled = true;
+      cameraSelect.style.display = 'inline-block';
       log("Fotocamera attivata");
     }
   };
@@ -386,13 +537,49 @@
       event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
       remoteVideo.classList.add('loaded');
       log("Track remoto aggiunto");
+      startCallTimer();
+    };
+
+    pc.onconnectionstatechange = async () => {
+      if (pc.connectionState === 'disconnected' || pc.connectionState === 'closed') {
+        await startRoomTimeout();
+      }
     };
 
     return pc;
   }
 
+  async function startRoomTimeout() {
+    if (roomId && !roomTimeout) {
+      roomTimeout = setTimeout(async () => {
+        if (roomId) {
+          const roomRef = db.collection("rooms").doc(roomId);
+          await roomRef.collection("callerCandidates").get().then(snapshot => {
+            snapshot.forEach(doc => doc.ref.delete());
+          });
+          await roomRef.collection("calleeCandidates").get().then(snapshot => {
+            snapshot.forEach(doc => doc.ref.delete());
+          });
+          await roomRef.delete();
+          log(`Stanza ${roomId} eliminata dopo 3 minuti di inattività`);
+          roomId = null;
+          updateButtonVisibility();
+          stopCallTimer();
+        }
+        roomTimeout = null;
+      }, 3 * 60 * 1000); // 3 minutes
+    }
+  }
+
+  async function clearRoomTimeout() {
+    if (roomTimeout) {
+      clearTimeout(roomTimeout);
+      roomTimeout = null;
+    }
+  }
+
   async function generateUniqueRoomId() {
-    const characters = '01';
+    const characters = '0123';
     let tries = 0;
     while (tries < 10) {
       const id = [...Array(3)].map(() => characters.charAt(Math.floor(Math.random() * characters.length))).join('');
@@ -435,6 +622,7 @@
         const answer = new RTCSessionDescription(data.answer);
         await pc.setRemoteDescription(answer);
         log("Answer impostata");
+        await clearRoomTimeout();
       }
     });
 
@@ -452,6 +640,8 @@
       navigator.clipboard.writeText(url);
       alert("Link stanza copiato!");
     };
+
+    await startRoomTimeout();
   }
 
   createRoomBtn.onclick = () => {
@@ -557,6 +747,8 @@
         }
       });
     });
+
+    await clearRoomTimeout();
   }
 
   hangupBtn.onclick = async () => {
@@ -577,42 +769,22 @@
     startCameraBtn.style.display = 'inline-block';
     hangupBtn.style.display = 'none';
     copyRoomBtn.style.display = 'none';
+    cameraSelect.style.display = 'none';
+    audioOutputSelect.style.display = 'none';
     localVideo.classList.remove('loaded');
     remoteVideo.classList.remove('loaded');
     roomIdInput.value = '';
+    stopCallTimer();
+    await startRoomTimeout();
     roomId = null;
     updateButtonVisibility();
-  };
-
-  let enlargedVideo = null;
-  localVideo.onclick = () => toggleEnlarge(localVideo);
-  remoteVideo.onclick = () => toggleEnlarge(remoteVideo);
-
-  function toggleEnlarge(video) {
-    if (enlargedVideo === video) {
-      return;
-    }
-    if (enlargedVideo) {
-      enlargedVideo.classList.remove('enlarged');
-      shrinkVideoBtn.style.display = 'none';
-    }
-    video.classList.add('enlarged');
-    enlargedVideo = video;
-    shrinkVideoBtn.style.display = 'inline-block';
-  }
-
-  shrinkVideoBtn.onclick = () => {
-    if (enlargedVideo) {
-      enlargedVideo.classList.remove('enlarged');
-      enlargedVideo = null;
-      shrinkVideoBtn.style.display = 'none';
-    }
   };
 
   (function prefillFromURL() {
     const urlRoom = new URLSearchParams(location.search).get('room');
     if (urlRoom) roomIdInput.value = urlRoom;
     updateButtonVisibility();
+    populateAudioOutputSelect();
   })();
   </script>
 </body>
